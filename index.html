@@ -11,6 +11,8 @@
     img { display: block; width: 100%; height: auto; }
     .plats { position: absolute; left: 5.4%; top: 66.5%; transform: translate(-50%, -50%); width: 6%; height: 14%; min-width: 44px; min-height: 44px; border-radius: .4rem; }
     .bank { left: 9.5%; top: 55%; width: 6%; height: 7%; }
+    .fonster { left: 64.7%; top: 41.6%; width: 1.8%; height: 4%; }
+    .plats.fonster span { left: 50%; top: 100%; transform: translateX(-50%); white-space: nowrap; }
     .strand { left: 85%; top: 52%; width: 10%; height: 8%; }
     .plats.strand span { right: 0; left: auto; top: 100%; width: max-content; }
     .plats:hover, .plats:focus-visible { outline: 2px solid #e8c86e; background: #e8c86e18; }
@@ -23,12 +25,13 @@
 <body>
   <main aria-label="Gränsland">
     <div class="stad">
-      <img src="staden.png" alt="Gränsland. En stad i dis vid havet. Till vänster står en parkbänk under trädet och en stoppskylt vid korsningen. Till höger möter den steniga stranden havet.">
+      <img src="staden.png" alt="Gränsland. En stad i dis vid havet. Till vänster står en parkbänk under trädet och en stoppskylt vid korsningen. Ett fönster lyser i hyreshuset. Till höger möter den steniga stranden havet.">
       <a class="plats" href="latar/stopp/"><span>Stopp</span></a>
       <a class="plats bank" href="singlar/saknad/"><span>Saknad</span></a>
       <a class="plats strand" href="latar/when-tomorrow-comes/"><span lang="en">When Tomorrow Comes</span></a>
+      <a class="plats fonster" href="latar/inte-min-tur-an/"><span>Inte min tur än</span></a>
     </div>
-    <nav aria-label="Låtar">Låtar · <a href="singlar/saknad/">Saknad</a> · <a href="latar/stopp/">Stopp</a> · <a href="latar/when-tomorrow-comes/" lang="en">When Tomorrow Comes</a></nav>
+    <nav aria-label="Låtar">Låtar · <a href="singlar/saknad/">Saknad</a> · <a href="latar/stopp/">Stopp</a> · <a href="latar/when-tomorrow-comes/" lang="en">When Tomorrow Comes</a> · <a href="latar/inte-min-tur-an/">Inte min tur än</a></nav>
   </main>
 </body>
 </html>
