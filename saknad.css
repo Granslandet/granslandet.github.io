@@ -1,0 +1,11 @@
+html { color-scheme: dark; background: #202323; color: #eee9dd; }
+body { margin: 0; font: 1.125rem/1.55 Georgia,serif; }
+main { max-width: 41rem; margin: clamp(2rem,9vh,6rem) auto; padding: 0 1.5rem 3rem; }
+a { color: #e6c76c; text-underline-offset: .2em; }
+h1 { font-size: clamp(2.8rem,8vw,5rem); font-weight: normal; line-height: 1.06; margin: .18em 0 .5em; }
+.kind, nav { font: 1rem/1.6 system-ui,sans-serif; }
+.kind { margin: 2.5rem 0 .35rem; color: #c8c5b9; }
+ul { list-style: none; padding: 0; }
+li { border-top: 1px solid #66685f; }
+li a { display:block; padding: 1rem 0; font-size: 1.45rem; }
+blockquote { margin: 2rem 0; font-style: italic; }
