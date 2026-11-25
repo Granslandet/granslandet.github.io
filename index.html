@@ -7,6 +7,15 @@
   <style>
     body { margin: 0; background: #202323; color: #eee9dd; font: 1rem/1.5 system-ui,sans-serif; }
     main { max-width: 128rem; margin: auto; }
+    .vridtips { display: none; padding: .8rem 1rem; }
+    .vridtips p { margin: 0; }
+    .vridtips button {
+      background: transparent; border: 0; color: #e8c86e; font: inherit;
+      padding: .5rem 0; text-decoration: underline; cursor: pointer;
+    }
+    @media (orientation: portrait) and (max-width: 600px) and (pointer: coarse) {
+      .vridtips:not([hidden]) { display: block; }
+    }
     .stad { position: relative; }
     img { display: block; width: 100%; height: auto; }
     .plats { position: absolute; left: 5.4%; top: 66.5%; transform: translate(-50%, -50%); width: 6%; height: 14%; min-width: 44px; min-height: 44px; border-radius: .4rem; }
@@ -48,6 +57,22 @@
 </head>
 <body>
   <main aria-label="Gränsland">
+    <aside class="vridtips" aria-label="Visningstips">
+      <p>Vrid gärna mobilen för att se staden i liggande läge.</p>
+      <button type="button" hidden>Fortsätt i stående läge</button>
+    </aside>
+    <script>
+      const tips = document.querySelector(".vridtips");
+      const fortsatt = tips.querySelector("button");
+      const nyckel = "gransland-vridtips-dolt";
+      try { tips.hidden = sessionStorage.getItem(nyckel) === "ja"; } catch {}
+      fortsatt.hidden = false;
+      fortsatt.addEventListener("click", () => {
+        tips.hidden = true;
+        try { sessionStorage.setItem(nyckel, "ja"); } catch {}
+        document.querySelector(".stad a").focus({ preventScroll: true });
+      });
+    </script>
     <div class="stad">
       <img src="staden.png" alt="Gränsland. En stad i dis vid havet. Till vänster står en parkbänk under trädet och en stoppskylt vid korsningen. Bakom bänken ligger en liten skogskyrkogård. Ett fönster lyser i hyreshuset. Till höger möter den steniga stranden havet. En bänk blickar ut över vattnet.">
       <a class="plats" href="latar/stopp/"><span>Stopp</span></a>
