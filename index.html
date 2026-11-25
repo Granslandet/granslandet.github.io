@@ -21,12 +21,18 @@
       place-items: center;
       text-decoration: none;
       outline: none;
-      color: #eee9dd;
+      color: #aaa69e;
       -webkit-tap-highlight-color: transparent;
     }
-    .grav span { opacity: 0; font: 1.35rem/1 Georgia, serif; text-shadow: 0 1px 3px #161616; }
-    .grav:hover span, .grav:focus-visible span, .grav:active span { opacity: 1; }
-    @media (hover: none) { .grav span { opacity: .8; } }
+    .grav span { opacity: 0; font: 1.35rem/1 Georgia, serif; }
+    @media (hover: hover) {
+      .grav:hover span { opacity: .65; transition: opacity 240ms ease-out 550ms; }
+    }
+    @media (hover: none) { .grav span { opacity: .55; } }
+    .grav:focus-visible span, .grav:active span { opacity: 1; transition: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .grav:hover span { transition-duration: 0s; }
+    }
     .bank { left: 9.5%; top: 55%; width: 6%; height: 7%; }
     .havsbank { left: 93.3%; top: 71.1%; width: 7%; height: 8.5%; }
     .fonster { left: 64.7%; top: 39.8%; width: 1.8%; height: 4%; }
