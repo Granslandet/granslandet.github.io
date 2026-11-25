@@ -8,13 +8,14 @@
     body { margin: 0; background: #202323; color: #eee9dd; font: 1rem/1.5 system-ui,sans-serif; }
     main { max-width: 128rem; margin: auto; }
     .vridtips { display: none; padding: .8rem 1rem; }
-    .vridtips p { margin: 0; }
+    .vridtips p { margin: 0; font-size: 1.15rem; font-weight: 650; }
+    .vridtips svg { width: 3.75rem; color: #e8c86e; }
     .vridtips button {
       background: transparent; border: 0; color: #e8c86e; font: inherit;
       padding: .5rem 0; text-decoration: underline; cursor: pointer;
     }
     @media (orientation: portrait) and (max-width: 600px) and (pointer: coarse) {
-      .vridtips:not([hidden]) { display: block; }
+      .vridtips:not([hidden]) { display: flex; align-items: center; gap: 1rem; border-bottom: 2px solid #b49b53; }
     }
     .stad { position: relative; }
     img { display: block; width: 100%; height: auto; }
@@ -33,14 +34,13 @@
       color: #aaa69e;
       -webkit-tap-highlight-color: transparent;
     }
-    .grav span { opacity: 0; font: 1.35rem/1 Georgia, serif; }
+    .grav svg { opacity: 0; width: .85rem; height: 1.2rem; }
     @media (hover: hover) {
-      .grav:hover span { opacity: .65; transition: opacity 240ms ease-out 550ms; }
+      .grav:hover svg { opacity: .65; transition: opacity 240ms ease-out 550ms; }
     }
-    @media (hover: none) { .grav span { opacity: .55; } }
-    .grav:focus-visible span, .grav:active span { opacity: 1; transition: none; }
+    .grav:focus-visible svg, .grav:active svg { opacity: 1; transition: none; }
     @media (prefers-reduced-motion: reduce) {
-      .grav:hover span { transition-duration: 0s; }
+      .grav:hover svg { transition-duration: 0s; }
     }
     .bank { left: 9.5%; top: 55%; width: 6%; height: 7%; }
     .havsbank { left: 93.3%; top: 71.1%; width: 7%; height: 8.5%; }
@@ -58,8 +58,16 @@
 <body>
   <main aria-label="Gränsland">
     <aside class="vridtips" aria-label="Visningstips">
-      <p>Vrid gärna mobilen för att se staden i liggande läge.</p>
-      <button type="button" hidden>Fortsätt i stående läge</button>
+      <svg viewBox="0 0 64 52" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="33" rx="3" opacity=".6"/>
+        <path d="M26 7c11 0 19 7 21 17m-7-5 7 6 5-8"/>
+        <rect x="24" y="31" width="36" height="18" rx="3"/>
+        <path d="M55 38v4"/>
+      </svg>
+      <div>
+        <p>Vrid mobilen till liggande läge</p>
+        <button type="button" hidden>Fortsätt i stående läge</button>
+      </div>
     </aside>
     <script>
       const tips = document.querySelector(".vridtips");
@@ -80,7 +88,7 @@
       <a class="plats strand" href="latar/when-tomorrow-comes/"><span lang="en">When Tomorrow Comes</span></a>
       <a class="plats fonster" href="latar/inte-min-tur-an/"><span>Inte min tur än</span></a>
       <a class="plats havsbank" href="latar/jag-reser-mig-igen/"><span>Jag reser mig igen!</span></a>
-      <a class="grav" href="till-minne/" aria-label="Till minne av Carolines vän"><span aria-hidden="true">✝</span></a>
+      <a class="grav" href="till-minne/" aria-label="Till minne av Carolines vän"><svg viewBox="0 0 14 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 1v18M2 7h10"/></svg></a>
     </div>
     <nav aria-label="Låtar">Låtar · <a href="singlar/saknad/">Saknad</a> · <a href="latar/stopp/">Stopp</a> · <a href="latar/when-tomorrow-comes/" lang="en">When Tomorrow Comes</a> · <a href="latar/inte-min-tur-an/">Inte min tur än</a> · <a href="latar/jag-reser-mig-igen/">Jag reser mig igen!</a></nav>
     <nav aria-label="Om projektet"><a href="om/">Om Gränsland</a></nav>
