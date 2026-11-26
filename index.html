@@ -17,7 +17,7 @@
     @media (orientation: portrait) and (max-width: 600px) and (pointer: coarse) {
       .vridtips:not([hidden]) { display: flex; align-items: center; gap: 1rem; border-bottom: 2px solid #b49b53; }
     }
-    .skymning { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; }
+    .skymning, .gryning { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; }
     .stad { position: relative; }
     img { display: block; width: 100%; height: auto; }
     .plats { position: absolute; left: 5.4%; top: 66.5%; transform: translate(-50%, -50%); width: 6%; height: 14%; min-width: 44px; min-height: 44px; border-radius: .4rem; }
@@ -85,6 +85,7 @@
     <div class="stad">
       <img src="staden.png" alt="Gränsland. En stad i dis vid havet. Till vänster står en parkbänk under trädet och en stoppskylt vid korsningen. Bakom bänken ligger en liten skogskyrkogård. Ett fönster lyser i hyreshuset. Till höger möter den steniga stranden havet. En bänk blickar ut över vattnet.">
       <canvas class="skymning" aria-hidden="true"></canvas>
+      <canvas class="gryning" aria-hidden="true"></canvas>
       <a class="plats" href="latar/stopp/"><span>Stopp</span></a>
       <a class="plats bank" href="singlar/saknad/"><span>Saknad</span></a>
       <a class="plats strand" href="latar/when-tomorrow-comes/"><span lang="en">When Tomorrow Comes</span></a>
@@ -98,7 +99,8 @@
   <script type="module">
 const photo = document.querySelector('.stad img');
 const layer = document.querySelector('.skymning');
-function dusk(now) {
+const dawnLayer = document.querySelector('.gryning');
+function solarPosition(now) {
   const rad = Math.PI / 180;
   const days = now.getTime() / 86400000 - 10957.5;
   const anomaly = (357.529 + .98560028 * days) * rad;
@@ -110,12 +112,38 @@ function dusk(now) {
   const hourAngle = (280.4606 + 360.9856474 * days + 12.83) * rad - ascension;
   const latitude = 55.87 * rad;
   const altitude = Math.asin(Math.sin(latitude)*Math.sin(declination) + Math.cos(latitude)*Math.cos(declination)*Math.cos(hourAngle)) / rad;
-  return 1 - smooth(-8, 5, altitude);
+  return { altitude, rising: Math.sin(hourAngle) < 0 };
 }
-function update() { layer.style.opacity = dusk(new Date()); }
+function update() {
+  const { altitude, rising } = solarPosition(new Date());
+  layer.style.opacity = 1 - smooth(-8, 5, altitude);
+  dawnLayer.style.opacity = rising ? 1 - smooth(0, 6, Math.abs(altitude)) : 0;
+}
 function smooth(low, high, value) {
   const t = Math.max(0, Math.min(1, (value-low)/(high-low)));
   return t*t*(3-2*t);
+}
+function dawnAlpha(u, v) {
+  const coast = smooth(.76, .94, u);
+  const sky = 1 - smooth(0, .15, Math.abs(v - .43));
+  const water = (1 - smooth(0, .12, Math.abs(v - .52))) * smooth(.85, .99, u);
+  return coast * (.34 * sky + .12 * water);
+}
+function prepareDawn() {
+  const w = dawnLayer.width = photo.naturalWidth;
+  const h = dawnLayer.height = photo.naturalHeight;
+  const ctx = dawnLayer.getContext('2d');
+  const pixels = ctx.createImageData(w, h);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = 4 * (y * w + x);
+      pixels.data[i] = 255;
+      pixels.data[i+1] = 213;
+      pixels.data[i+2] = 167;
+      pixels.data[i+3] = Math.round(255 * dawnAlpha(x/w, y/h));
+    }
+  }
+  ctx.putImageData(pixels,0,0);
 }
 function prepare() {
   const w = layer.width = photo.naturalWidth;
@@ -143,6 +171,7 @@ function prepare() {
     }
   }
   ctx.putImageData(pixels,0,0);
+  prepareDawn();
   setInterval(update, 60000);
   document.addEventListener('visibilitychange', update);
   update();
