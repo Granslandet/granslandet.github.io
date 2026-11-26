@@ -17,6 +17,7 @@
     @media (orientation: portrait) and (max-width: 600px) and (pointer: coarse) {
       .vridtips:not([hidden]) { display: flex; align-items: center; gap: 1rem; border-bottom: 2px solid #b49b53; }
     }
+    .skymning { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; }
     .stad { position: relative; }
     img { display: block; width: 100%; height: auto; }
     .plats { position: absolute; left: 5.4%; top: 66.5%; transform: translate(-50%, -50%); width: 6%; height: 14%; min-width: 44px; min-height: 44px; border-radius: .4rem; }
@@ -83,6 +84,7 @@
     </script>
     <div class="stad">
       <img src="staden.png" alt="Gränsland. En stad i dis vid havet. Till vänster står en parkbänk under trädet och en stoppskylt vid korsningen. Bakom bänken ligger en liten skogskyrkogård. Ett fönster lyser i hyreshuset. Till höger möter den steniga stranden havet. En bänk blickar ut över vattnet.">
+      <canvas class="skymning" aria-hidden="true"></canvas>
       <a class="plats" href="latar/stopp/"><span>Stopp</span></a>
       <a class="plats bank" href="singlar/saknad/"><span>Saknad</span></a>
       <a class="plats strand" href="latar/when-tomorrow-comes/"><span lang="en">When Tomorrow Comes</span></a>
@@ -93,5 +95,61 @@
     <nav aria-label="Låtar">Låtar · <a href="singlar/saknad/">Saknad</a> · <a href="latar/stopp/">Stopp</a> · <a href="latar/when-tomorrow-comes/" lang="en">When Tomorrow Comes</a> · <a href="latar/inte-min-tur-an/">Inte min tur än</a> · <a href="latar/jag-reser-mig-igen/">Jag reser mig igen!</a></nav>
     <nav aria-label="Om projektet"><a href="om/">Om Gränsland</a></nav>
   </main>
+  <script type="module">
+const photo = document.querySelector('.stad img');
+const layer = document.querySelector('.skymning');
+function dusk(now) {
+  const rad = Math.PI / 180;
+  const days = now.getTime() / 86400000 - 10957.5;
+  const anomaly = (357.529 + .98560028 * days) * rad;
+  const longitude = (280.459 + .98564736 * days + 1.915 * Math.sin(anomaly) + .020 * Math.sin(2 * anomaly)) * rad;
+  const tilt = 23.44 * rad;
+  const declination = Math.asin(Math.sin(tilt) * Math.sin(longitude));
+  const ascension = Math.atan2(Math.cos(tilt) * Math.sin(longitude), Math.cos(longitude));
+  // Solar altitude at Landskrona, calculated from UTC.
+  const hourAngle = (280.4606 + 360.9856474 * days + 12.83) * rad - ascension;
+  const latitude = 55.87 * rad;
+  const altitude = Math.asin(Math.sin(latitude)*Math.sin(declination) + Math.cos(latitude)*Math.cos(declination)*Math.cos(hourAngle)) / rad;
+  return 1 - smooth(-8, 5, altitude);
+}
+function update() { layer.style.opacity = dusk(new Date()); }
+function smooth(low, high, value) {
+  const t = Math.max(0, Math.min(1, (value-low)/(high-low)));
+  return t*t*(3-2*t);
+}
+function prepare() {
+  const w = layer.width = photo.naturalWidth;
+  const h = layer.height = photo.naturalHeight;
+  const ctx = layer.getContext('2d');
+  ctx.drawImage(photo,0,0);
+  const pixels = ctx.getImageData(0,0,w,h);
+  const data = pixels.data;
+  for (let y=0; y<h; y++) {
+    const v=y/h;
+    for (let x=0; x<w; x++) {
+      const u=x/w, i=4*(y*w+x);
+      const r=data[i], g=data[i+1], b=data[i+2];
+      const light=.2126*r+.7152*g+.0722*b;
+      const titleArea = smooth(.24,.28,u) * (1-smooth(.72,.77,u)) * (1-smooth(.22,.28,v));
+      const title = titleArea * smooth(5,24,g-b);
+      // Feather both skyline and shoreline to avoid cutting a line through the mist.
+      const shore = smooth(.69,.83,u);
+      const land = smooth(.21,.34,v) * (1-shore*(1-smooth(.59,.78,v)));
+      const glow = smooth(111,186,light);
+      const warmWindow = smooth(82,145,light)*smooth(10,40,r-b);
+      const protect = Math.max(title,land*Math.max(glow,warmWindow));
+      data[i]=13; data[i+1]=23; data[i+2]=42;
+      data[i+3]=Math.round(255*(.69-.15*v)*(1-protect));
+    }
+  }
+  ctx.putImageData(pixels,0,0);
+  setInterval(update, 60000);
+  document.addEventListener('visibilitychange', update);
+  update();
+}
+
+if (photo.complete && photo.naturalWidth) prepare();
+else photo.addEventListener('load',prepare,{once:true});
+</script>
 </body>
 </html>
