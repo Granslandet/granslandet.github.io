@@ -45,14 +45,16 @@ function prepare() {
       const u=x/w, i=4*(y*w+x);
       const r=data[i], g=data[i+1], b=data[i+2];
       const light=.2126*r+.7152*g+.0722*b;
-      const title=u>.27 && u<.74 && v<.25 ? smooth(5,24,g-b) : 0;
-      // Sky and sea keep their dusk tint. Protect luminous details on land.
-      const onLand=v>.27 && (u<.76 || v>.69);
-      const glow=onLand ? smooth(95,186,light) : 0;
-      const warmWindow=onLand ? smooth(82,145,light)*smooth(10,40,r-b) : 0;
-      const protect=Math.max(title,glow,warmWindow);
+      const titleArea = smooth(.24,.28,u) * (1-smooth(.72,.77,u)) * (1-smooth(.22,.28,v));
+      const title = titleArea * smooth(5,24,g-b);
+      // Feather both skyline and shoreline to avoid cutting a line through the mist.
+      const shore = smooth(.69,.83,u);
+      const land = smooth(.21,.34,v) * (1-shore*(1-smooth(.59,.78,v)));
+      const glow = smooth(111,186,light);
+      const warmWindow = smooth(82,145,light)*smooth(10,40,r-b);
+      const protect = Math.max(title,land*Math.max(glow,warmWindow));
       data[i]=13; data[i+1]=23; data[i+2]=42;
-      data[i+3]=Math.round(255*(.62-.15*v)*(1-protect));
+      data[i+3]=Math.round(255*(.69-.15*v)*(1-protect));
     }
   }
   ctx.putImageData(pixels,0,0);
