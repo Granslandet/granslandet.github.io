@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="sv">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skymningsprov · Gränsland</title>
+<style>
+* { box-sizing: border-box }
+body { margin: 0; color: #ede8dc; background: #202323; font: 1rem/1.5 system-ui,sans-serif }
+main { max-width: 128rem; margin: auto }
+.scene { position: relative }
+img,canvas { display: block; width: 100%; height: auto }
+canvas { position: absolute; inset: 0; pointer-events: none; opacity: 0 }
+.controls { display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; padding: 1rem }
+input { width: min(19rem,45vw); accent-color: #dfbd62 }
+output { min-width: 4ch; font-variant-numeric: tabular-nums }
+a { color: #dfbd62 }
+</style>
+<main>
+<div class="scene"><img src="staden.png" alt="Gränslands stad vid havet"><canvas aria-hidden="true"></canvas></div>
+<div class="controls"><label for="strength">Skymning</label><input type="range" id="strength" min="0" max="100" value="55" disabled><output for="strength">55 %</output><a href="./">Till startsidan</a></div>
+</main>
+<script>
+const photo = document.querySelector('img');
+const layer = document.querySelector('canvas');
+const slider = document.querySelector('input');
+const output = document.querySelector('output');
+function update() {
+  layer.style.opacity = Number(slider.value) / 100;
+  output.textContent = slider.value + ' %';
+}
+function smooth(low, high, value) {
+  const t = Math.max(0, Math.min(1, (value-low)/(high-low)));
+  return t*t*(3-2*t);
+}
+function prepare() {
+  const w = layer.width = photo.naturalWidth;
+  const h = layer.height = photo.naturalHeight;
+  const ctx = layer.getContext('2d');
+  ctx.drawImage(photo,0,0);
+  const pixels = ctx.getImageData(0,0,w,h);
+  const data = pixels.data;
+  for (let y=0; y<h; y++) {
+    const v=y/h;
+    for (let x=0; x<w; x++) {
+      const u=x/w, i=4*(y*w+x);
+      const r=data[i], g=data[i+1], b=data[i+2];
+      const light=.2126*r+.7152*g+.0722*b;
+      const title=u>.27 && u<.74 && v<.25 ? smooth(5,24,g-b) : 0;
+      // Sky and sea keep their dusk tint. Protect luminous details on land.
+      const onLand=v>.27 && (u<.76 || v>.69);
+      const glow=onLand ? smooth(95,186,light) : 0;
+      const warmWindow=onLand ? smooth(82,145,light)*smooth(10,40,r-b) : 0;
+      const protect=Math.max(title,glow,warmWindow);
+      data[i]=13; data[i+1]=23; data[i+2]=42;
+      data[i+3]=Math.round(255*(.62-.15*v)*(1-protect));
+    }
+  }
+  ctx.putImageData(pixels,0,0);
+  slider.disabled=false;
+  update();
+}
+slider.addEventListener('input',update);
+if (photo.complete && photo.naturalWidth) prepare();
+else photo.addEventListener('load',prepare,{once:true});
+</script>
+</html>
