@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="sv">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gryningsprov · Gränsland</title>
+<style>
+* { box-sizing: border-box }
+body { margin: 0; color: #ede8dc; background: #202323; font: 1rem/1.5 system-ui,sans-serif }
+main { max-width: 128rem; margin: auto }
+.scene { position: relative }
+img,canvas { display: block; width: 100%; height: auto }
+canvas { position: absolute; inset: 0; pointer-events: none; opacity: 0 }
+.controls { display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; padding: 1rem }
+input { width: min(19rem,45vw); accent-color: #dfbd62 }
+output { min-width: 4ch; font-variant-numeric: tabular-nums }
+a { color: #dfbd62 }
+</style>
+<main>
+<div class="scene"><img src="staden.png" alt="Gränslands stad vid havet"><canvas aria-hidden="true"></canvas></div>
+<div class="controls"><label for="strength">Gryningsljus</label><input type="range" id="strength" min="0" max="100" value="55" disabled><output for="strength">55 %</output><a href="./">Till startsidan</a></div>
+</main>
+<script>
+const photo = document.querySelector('img');
+const layer = document.querySelector('canvas');
+const slider = document.querySelector('input');
+const output = document.querySelector('output');
+function update() {
+  layer.style.opacity = Number(slider.value) / 100;
+  output.textContent = slider.value + ' %';
+}
+function smooth(low, high, value) {
+  const t = Math.max(0, Math.min(1, (value-low)/(high-low)));
+  return t*t*(3-2*t);
+}
+function dawnAlpha(u, v) {
+  const coast = smooth(.76, .94, u);
+  const sky = 1 - smooth(0, .15, Math.abs(v - .43));
+  const water = (1 - smooth(0, .12, Math.abs(v - .52))) * smooth(.85, .99, u);
+  return coast * (.34 * sky + .12 * water);
+}
+function prepare() {
+  const w = layer.width = photo.naturalWidth;
+  const h = layer.height = photo.naturalHeight;
+  const ctx = layer.getContext('2d');
+  const pixels = ctx.createImageData(w, h);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = 4 * (y * w + x);
+      pixels.data[i] = 255;
+      pixels.data[i+1] = 213;
+      pixels.data[i+2] = 167;
+      pixels.data[i+3] = Math.round(255 * dawnAlpha(x/w, y/h));
+    }
+  }
+  ctx.putImageData(pixels,0,0);
+  slider.disabled=false;
+  update();
+}
+slider.addEventListener('input',update);
+if (photo.complete && photo.naturalWidth) prepare();
+else photo.addEventListener('load',prepare,{once:true});
+</script>
+</html>
